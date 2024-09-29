@@ -1,7 +1,10 @@
 package br.edu.ibmec.projeto_cloud.controller;
 
 import br.edu.ibmec.projeto_cloud.dto.TransacaoResponseDTO;
+import br.edu.ibmec.projeto_cloud.exception.CartaoInativoException;
 import br.edu.ibmec.projeto_cloud.exception.LimiteInsuficienteException;
+import br.edu.ibmec.projeto_cloud.exception.TransacaoDuplicadaException;
+import br.edu.ibmec.projeto_cloud.exception.FrequenciaAltaTransacoesException;
 import br.edu.ibmec.projeto_cloud.model.Transacao;
 import br.edu.ibmec.projeto_cloud.service.TransacaoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,8 +77,54 @@ public class TransacaoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.mensagem").value("Limite insuficiente"));
+                .andExpect(jsonPath("$.message").value("Limite insuficiente"));
     }
 
+    @Test
+    void autorizarTransacao_cartaoInativo() throws Exception {
+        // Arrange
+        int cartaoId = 1;
+
+        when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
+                .thenThrow(new CartaoInativoException("Cartão não está ativo"));
+
+        // Act & Assert
+        mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Cartão não está ativo"));
+    }
+
+    @Test
+    void autorizarTransacao_transacaoDuplicada() throws Exception {
+        // Arrange
+        int cartaoId = 1;
+
+        when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
+                .thenThrow(new TransacaoDuplicadaException("Transação duplicada"));
+
+        // Act & Assert
+        mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Transação duplicada"));
+    }
+    @Test
+    void autorizarTransacao_frequenciaAltaTransacoes() throws Exception {
+        // Arrange
+        int cartaoId = 1;
+
+        when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
+                .thenThrow(new FrequenciaAltaTransacoesException("Alta frequência de transações em pequeno intervalo"));
+
+        // Act & Assert
+        mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Alta frequência de transações em pequeno intervalo"));
+    }
 
 }
