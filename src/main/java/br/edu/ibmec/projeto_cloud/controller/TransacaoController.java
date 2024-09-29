@@ -1,5 +1,6 @@
 package br.edu.ibmec.projeto_cloud.controller;
 
+import br.edu.ibmec.projeto_cloud.dto.TransacaoResponseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -21,9 +22,9 @@ public class TransacaoController {
 
     // Endpoint para autorizar uma nova transação
     @PostMapping("/autorizar/{cartaoId}")
-    public ResponseEntity<String> autorizarTransacao(@PathVariable int cartaoId, @RequestBody Transacao transacao) {
-        String resultado = transacaoService.autorizarTransacao(cartaoId, transacao);
-        if (resultado.equals("Transação autorizada")) {
+    public ResponseEntity<TransacaoResponseDTO> autorizarTransacao(@PathVariable int cartaoId, @RequestBody Transacao transacao) {
+        TransacaoResponseDTO resultado = transacaoService.autorizarTransacao(cartaoId, transacao);
+        if ("Sucesso".equals(resultado.getStatus())) {
             return ResponseEntity.ok(resultado);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
