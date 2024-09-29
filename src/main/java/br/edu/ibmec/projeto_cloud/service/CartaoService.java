@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.edu.ibmec.projeto_cloud.model.Cartao;
+import br.edu.ibmec.projeto_cloud.model.Cliente;
 import br.edu.ibmec.projeto_cloud.repository.CartaoRepository;
 
 @Service
@@ -27,4 +28,10 @@ public class CartaoService {
         return cartaoRepository.findById(cartaoId)
                 .orElseThrow(() -> new CartaoNaoEncontradoException("Cartão não encontrado"));
     }
+
+    public Cliente buscarClientePorCartaoId(int cartaoId) {
+        Cartao cartao = buscarPorId(cartaoId);
+        return cartao.getCliente(); // Certifique-se de que o Cartao tenha o método getCliente()
+    }
+
 }

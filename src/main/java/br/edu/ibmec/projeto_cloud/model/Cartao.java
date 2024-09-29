@@ -1,4 +1,5 @@
 package br.edu.ibmec.projeto_cloud.model;
+
 import java.time.LocalDate;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -9,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -48,7 +50,17 @@ public class Cartao {
     @JsonManagedReference 
     private List<Transacao> transacoes;
 
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
     public void adicionarTransacao(Transacao transacao) {
         this.transacoes.add(transacao);
     }
+
+    // Getter e Setter para Cliente
+    public Cliente getCliente() {
+        return cliente;
+    }
+
 }
