@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
+import br.edu.ibmec.projeto_cloud.dto.CartaoResponseDTO;
 import br.edu.ibmec.projeto_cloud.model.Cartao;
 import br.edu.ibmec.projeto_cloud.service.CartaoService;
 
@@ -19,15 +20,29 @@ public class CartaoController {
 
     // Endpoint para criar um novo cartão
     @PostMapping
-    public ResponseEntity<Cartao> criarCartao(@RequestBody Cartao cartao) {
+    public ResponseEntity<CartaoResponseDTO> criarCartao(@RequestBody Cartao cartao) {
         Cartao novoCartao = cartaoService.criarCartao(cartao);
-        return new ResponseEntity<>(novoCartao, HttpStatus.CREATED);
+        CartaoResponseDTO response = new CartaoResponseDTO(
+                novoCartao.getId(),
+                novoCartao.getNumeroCartao(),
+                novoCartao.getLimite(),
+                novoCartao.getSaldo(),
+                novoCartao.getEstaAtivado()
+        );
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     // Endpoint para buscar um cartão por ID
     @GetMapping("/{cartaoId}")
-    public ResponseEntity<Cartao> buscarCartaoPorId(@PathVariable int cartaoId) {
+    public ResponseEntity<CartaoResponseDTO> buscarCartaoPorId(@PathVariable int cartaoId) {
         Cartao cartao = cartaoService.buscarPorId(cartaoId);
-        return ResponseEntity.ok(cartao);
+        CartaoResponseDTO response = new CartaoResponseDTO(
+                cartao.getId(),
+                cartao.getNumeroCartao(),
+                cartao.getLimite(),
+                cartao.getSaldo(),
+                cartao.getEstaAtivado()
+        );
+        return ResponseEntity.ok(response);
     }
 }

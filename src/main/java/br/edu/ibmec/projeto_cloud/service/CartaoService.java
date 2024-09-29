@@ -1,5 +1,6 @@
 package br.edu.ibmec.projeto_cloud.service;
 
+import br.edu.ibmec.projeto_cloud.exception.CartaoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,6 @@ public class CartaoService {
     // Método para buscar um cartão por ID
     public Cartao buscarPorId(int cartaoId) {
         return cartaoRepository.findById(cartaoId)
-            .orElseThrow(() -> new RuntimeException("Cartão não encontrado"));
+                .orElseThrow(() -> new CartaoNaoEncontradoException("Cartão não encontrado"));
     }
 }
