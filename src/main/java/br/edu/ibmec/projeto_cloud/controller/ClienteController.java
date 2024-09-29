@@ -1,5 +1,6 @@
 package br.edu.ibmec.projeto_cloud.controller;
 
+import br.edu.ibmec.projeto_cloud.dto.ClienteResponseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -28,9 +29,9 @@ public class ClienteController {
 
     // Endpoint para associar um cartão existente a um cliente usando o ID do cartão
     @PostMapping("/{clienteId}/cartoes/{cartaoId}")
-    public ResponseEntity<Cliente> associarCartao(@PathVariable int clienteId, @PathVariable int cartaoId) {
+    public ResponseEntity<ClienteResponseDTO> associarCartao(@PathVariable int clienteId, @PathVariable int cartaoId) {
         try {
-            Cliente clienteAtualizado = clienteService.associarCartao(clienteId, cartaoId);
+            ClienteResponseDTO clienteAtualizado = clienteService.associarCartao(clienteId, cartaoId);
             return ResponseEntity.ok(clienteAtualizado);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
