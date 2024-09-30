@@ -82,6 +82,13 @@ public class ClienteResponseDTO {
     public void setEndereco(String endereco) {
         this.endereco = endereco;
     }
+
+    public List<CartaoResponseDTO> getCartoes() {
+        return cartoes;
+    }
+
 }
+
+
 
 

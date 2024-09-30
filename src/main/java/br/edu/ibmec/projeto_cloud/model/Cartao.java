@@ -3,6 +3,7 @@ package br.edu.ibmec.projeto_cloud.model;
 import java.time.LocalDate;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -52,6 +53,7 @@ public class Cartao {
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
+    @JsonBackReference
     private Cliente cliente;
 
     public void adicionarTransacao(Transacao transacao) {

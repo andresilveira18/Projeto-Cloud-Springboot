@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -47,6 +48,7 @@ public class Cliente {
 
     @OneToMany
     @JoinColumn(referencedColumnName = "id", name = "cliente_id")
+    @JsonManagedReference
     private List<Cartao> cartoes = new ArrayList<>();
 
     public void associarCartao(Cartao cartao) {
