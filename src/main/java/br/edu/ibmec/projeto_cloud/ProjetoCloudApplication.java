@@ -12,7 +12,7 @@ public class ProjetoCloudApplication {
 		String activeProfile = System.getProperty("spring.profiles.active");
 		if (!"test".equals(activeProfile)) {
 			Dotenv dotenv = Dotenv.configure()
-					.directory("./Projeto-Cloud-Springboot")
+					.directory("./")
 					.load();
 			System.setProperty("DB_HOST", dotenv.get("DB_HOST"));
 			System.setProperty("DB_PORT", dotenv.get("DB_PORT"));

@@ -1,5 +1,6 @@
 package br.edu.ibmec.projeto_cloud.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,13 +114,17 @@ public class TransacaoService {
     }
 
     // Método para buscar todas as transações aprovadas de um cliente
-    public List<Transacao> buscarTransacoesPorCliente(int clienteId) {
+    public List<Transacao> buscarTransacoesPorCliente(int clienteId, int mes, int ano){
         Cliente cliente = clienteRepository.findById(clienteId)
             .orElseThrow(() -> new ClienteNaoEncontradoException("Cliente não encontrado"));
 
-        // Busca todas as transações associadas aos cartões do cliente
+        // Busca todas as transações associadas aos cartões do cliente e filtra por mês e ano
         return cliente.getCartoes().stream()
             .flatMap(cartao -> cartao.getTransacoes().stream())
+            .filter(transacao -> {
+                LocalDateTime dataTransacao = transacao.getDataTransacao();
+                return dataTransacao.getMonthValue() == mes && dataTransacao.getYear() == ano;
+            })
             .collect(Collectors.toList());
     }
 }
