@@ -1,6 +1,6 @@
 package br.edu.ibmec.projeto_cloud.service;
 
-import java.time.LocalDate;
+//import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,10 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import br.edu.ibmec.projeto_cloud.model.Cartao;
 import br.edu.ibmec.projeto_cloud.model.Cliente;
 import br.edu.ibmec.projeto_cloud.model.Transacao;
-import br.edu.ibmec.projeto_cloud.service.NotificacaoService;
+//import br.edu.ibmec.projeto_cloud.service.NotificacaoService;
 import br.edu.ibmec.projeto_cloud.repository.CartaoRepository;
 import br.edu.ibmec.projeto_cloud.repository.ClienteRepository;
 import br.edu.ibmec.projeto_cloud.repository.TransacaoRepository;
+import java.util.Optional;
+
 
 @Service
 public class TransacaoService {
@@ -114,17 +116,26 @@ public class TransacaoService {
     }
 
     // Método para buscar todas as transações aprovadas de um cliente
-    public List<Transacao> buscarTransacoesPorCliente(int clienteId, int mes, int ano){
+    public List<Transacao> buscarTransacoesPorCartao(int clienteId, String numeroCartao, int mes, int ano) throws ClienteNaoEncontradoException {
         Cliente cliente = clienteRepository.findById(clienteId)
-            .orElseThrow(() -> new ClienteNaoEncontradoException("Cliente não encontrado"));
-
-        // Busca todas as transações associadas aos cartões do cliente e filtra por mês e ano
-        return cliente.getCartoes().stream()
-            .flatMap(cartao -> cartao.getTransacoes().stream())
-            .filter(transacao -> {
-                LocalDateTime dataTransacao = transacao.getDataTransacao();
-                return dataTransacao.getMonthValue() == mes && dataTransacao.getYear() == ano;
-            })
-            .collect(Collectors.toList());
+                .orElseThrow(() -> new ClienteNaoEncontradoException("Cliente não encontrado com ID: " + clienteId));
+    
+        Optional<Cartao> optCartao = cliente.getCartoes()
+                .stream()
+                .filter(cartao -> cartao.getNumeroCartao() == Long.parseLong(numeroCartao)) 
+                .findFirst();
+    
+        if (optCartao.isEmpty()) {
+            throw new CartaoNaoEncontradoException("Cartão não encontrado com número: " + numeroCartao);
+        }
+    
+        return optCartao.get()
+                .getTransacoes()
+                .stream()
+                .filter(transacao -> {
+                    LocalDateTime dataTransacao = transacao.getDataTransacao();
+                    return dataTransacao.getMonthValue() == mes && dataTransacao.getYear() == ano;
+                })
+                .collect(Collectors.toList());
     }
 }
