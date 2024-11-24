@@ -38,7 +38,7 @@ public class TransacaoController {
     }
 
     // Endpoint para buscar todas as transações aprovadas de um cliente
-   @GetMapping("/{id}")
+    @GetMapping("/cliente/{id}")
     public ResponseEntity<List<Transacao>> extratoCartao(
             @PathVariable("id") int id,
             @RequestParam String numeroCartao,
@@ -49,17 +49,16 @@ public class TransacaoController {
             LocalDateTime now = LocalDateTime.now();
             int mesFiltrado = Optional.ofNullable(mes).orElse(now.getMonthValue());
             int anoFiltrado = Optional.ofNullable(ano).orElse(now.getYear());
-
+    
             // Busca as transações através do serviço
             List<Transacao> transacoes = transacaoService.buscarTransacoesPorCartao(id, numeroCartao, mesFiltrado, anoFiltrado);
-
+    
             return ResponseEntity.ok(transacoes);
         } catch (ClienteNaoEncontradoException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-    }
+    }    
 }
-
 
