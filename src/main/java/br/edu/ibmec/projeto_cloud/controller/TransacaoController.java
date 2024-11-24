@@ -1,6 +1,8 @@
 package br.edu.ibmec.projeto_cloud.controller;
 
 import br.edu.ibmec.projeto_cloud.dto.TransacaoResponseDTO;
+import br.edu.ibmec.projeto_cloud.exception.ClienteNaoEncontradoException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -36,22 +38,27 @@ public class TransacaoController {
     }
 
     // Endpoint para buscar todas as transações aprovadas de um cliente
-    @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<Transacao>> getTransacoesPorCliente(
-            @PathVariable int clienteId,
+    @GetMapping("/cliente/{id}")
+    public ResponseEntity<List<Transacao>> extratoCartao(
+            @PathVariable("id") int id,
+            @RequestParam String numeroCartao,
             @RequestParam(required = false) Integer mes,
             @RequestParam(required = false) Integer ano) {
-
         try {
-            // Se mês e ano não forem fornecidos, usar mês e ano atuais
+            // Define o mês e ano atuais se não forem fornecidos
             LocalDateTime now = LocalDateTime.now();
             int mesFiltrado = Optional.ofNullable(mes).orElse(now.getMonthValue());
             int anoFiltrado = Optional.ofNullable(ano).orElse(now.getYear());
-
-            List<Transacao> transacoes = transacaoService.buscarTransacoesPorCliente(clienteId, mesFiltrado, anoFiltrado);
+    
+            // Busca as transações através do serviço
+            List<Transacao> transacoes = transacaoService.buscarTransacoesPorCartao(id, numeroCartao, mesFiltrado, anoFiltrado);
+    
             return ResponseEntity.ok(transacoes);
-        } catch (RuntimeException e) {
+        } catch (ClienteNaoEncontradoException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-    }
+    }    
 }
+
