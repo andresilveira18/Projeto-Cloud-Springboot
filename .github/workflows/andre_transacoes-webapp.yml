@@ -6,7 +6,7 @@ name: Build and deploy JAR app to Azure Web App - transacoes-webapp
 on:
   push:
     branches:
-      - Andre
+      - main
   workflow_dispatch:
 
 jobs:
@@ -19,11 +19,11 @@ jobs:
       - name: Set up Java version
         uses: actions/setup-java@v4
         with:
-          java-version: 'java21'
-          distribution: 'microsoft'
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean install -f ./pom.xml
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -49,9 +49,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_113F0B9C8C634BA2A2CCEED38D825510 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9F0E22567EA94AFD9CFD42DE0050C6F7 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_80BD2646445D428090DF4AA4A7EBB483 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D20FA817707D45848891DBE557FD7806 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_95E1EB755C4A4867840D8BDA262DF1D6 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FB1D560D1DEE41D3A731585C5D1CD83A }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -60,4 +60,3 @@ jobs:
           app-name: 'transacoes-webapp'
           slot-name: 'Production'
           package: '*.jar'
-          
