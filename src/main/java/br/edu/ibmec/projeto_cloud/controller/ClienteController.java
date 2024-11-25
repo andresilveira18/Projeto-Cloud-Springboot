@@ -94,5 +94,34 @@ public class ClienteController {
                     ));
         }
     }
+
+    @GetMapping("/cpf/{cpf}")
+public ResponseEntity<?> buscarClientePorCpf(@PathVariable String cpf) {
+    try {
+        ClienteResponseDTO cliente = clienteService.buscarPorCpf(cpf)
+                .map(c -> new ClienteResponseDTO(
+                        c.getId(),
+                        c.getNome(),
+                        c.getCpf(),
+                        c.getDataNascimento(),
+                        c.getEmail(),
+                        c.getTelefone(),
+                        c.getEndereco(),
+                        null // Preencher cartões, se necessário
+                ))
+                .orElseThrow(() -> new ClienteNaoEncontradoException("Cliente não encontrado com CPF: " + cpf));
+        
+        return ResponseEntity.ok(cliente);
+    } catch (ClienteNaoEncontradoException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getErrorResponse());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiErrorResponse(
+                        "INTERNAL_SERVER_ERROR",
+                        "Erro Interno",
+                        "Ocorreu um erro ao buscar o cliente pelo CPF."
+                ));
+    }
+}
     
 }

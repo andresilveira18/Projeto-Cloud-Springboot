@@ -15,7 +15,7 @@ import br.edu.ibmec.projeto_cloud.repository.CartaoRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-//import java.util.stream.Collectors;
+
 
 @Service
 public class ClienteService {
@@ -70,4 +70,10 @@ public class ClienteService {
     public Optional<Cliente> buscarPorId(int clienteId) {
         return clienteRepository.findById(clienteId);
     }
+
+    public Optional<Cliente> buscarPorCpf(String cpf) {
+        return clienteRepository.findByCpf(cpf);
+    }
+
+    
 }
