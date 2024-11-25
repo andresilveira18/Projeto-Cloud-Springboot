@@ -61,70 +61,69 @@ public class TransacaoControllerTest {
     }
 
     @Test
-    void autorizarTransacao_limiteInsuficiente() throws Exception {
-        // Arrange
-        int cartaoId = 1;
-        Transacao transacao = new Transacao();
-        transacao.setValor(100.0);
-        transacao.setComerciante("Loja A");
+void autorizarTransacao_limiteInsuficiente() throws Exception {
+    // Arrange
+    int cartaoId = 1;
 
-        // Simula o serviço lançando a exceção de limite insuficiente
-        when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
-                .thenThrow(new LimiteInsuficienteException("Limite insuficiente"));
+    // Simula o serviço lançando a exceção de limite insuficiente
+    when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
+            .thenThrow(new LimiteInsuficienteException("Limite insuficiente"));
 
-        // Act & Assert
-        mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Limite insuficiente"));
-    }
+    // Act & Assert
+    mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
+            .andExpect(status().isPaymentRequired()) // 402
+            .andExpect(jsonPath("$.message").value("Limite insuficiente"));
+}
 
-    @Test
-    void autorizarTransacao_cartaoInativo() throws Exception {
-        // Arrange
-        int cartaoId = 1;
+@Test
+void autorizarTransacao_cartaoInativo() throws Exception {
+    // Arrange
+    int cartaoId = 1;
 
-        when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
-                .thenThrow(new CartaoInativoException("Cartão não está ativo"));
+    when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
+            .thenThrow(new CartaoInativoException("Cartão não está ativo"));
 
-        // Act & Assert
-        mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Cartão não está ativo"));
-    }
+    // Act & Assert
+    mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
+            .andExpect(status().isForbidden()) // 403
+            .andExpect(jsonPath("$.message").value("Cartão não está ativo"));
+}
 
-    @Test
-    void autorizarTransacao_transacaoDuplicada() throws Exception {
-        // Arrange
-        int cartaoId = 1;
+@Test
+void autorizarTransacao_transacaoDuplicada() throws Exception {
+    // Arrange
+    int cartaoId = 1;
 
-        when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
-                .thenThrow(new TransacaoDuplicadaException("Transação duplicada"));
+    when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
+            .thenThrow(new TransacaoDuplicadaException("Transação duplicada"));
 
-        // Act & Assert
-        mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Transação duplicada"));
-    }
-    @Test
-    void autorizarTransacao_frequenciaAltaTransacoes() throws Exception {
-        // Arrange
-        int cartaoId = 1;
+    // Act & Assert
+    mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
+            .andExpect(status().isConflict()) // 409
+            .andExpect(jsonPath("$.message").value("Transação duplicada"));
+}
 
-        when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
-                .thenThrow(new FrequenciaAltaTransacoesException("Alta frequência de transações em pequeno intervalo"));
+@Test
+void autorizarTransacao_frequenciaAltaTransacoes() throws Exception {
+    // Arrange
+    int cartaoId = 1;
 
-        // Act & Assert
-        mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Alta frequência de transações em pequeno intervalo"));
-    }
+    when(transacaoService.autorizarTransacao(eq(cartaoId), any(Transacao.class)))
+            .thenThrow(new FrequenciaAltaTransacoesException("Alta frequência de transações em pequeno intervalo"));
+
+    // Act & Assert
+    mockMvc.perform(post("/transacoes/autorizar/{cartaoId}", cartaoId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"valor\": 100.0, \"comerciante\": \"Loja A\"}"))
+            .andExpect(status().isTooManyRequests()) // 429
+            .andExpect(jsonPath("$.message").value("Alta frequência de transações em pequeno intervalo"));
+}
+
 
 }

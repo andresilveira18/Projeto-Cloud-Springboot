@@ -28,10 +28,30 @@ public class ClienteController {
 
     // Endpoint para criar um novo cliente
     @PostMapping
-    public ResponseEntity<Cliente> criarCliente(@RequestBody Cliente cliente) {
-        Cliente novoCliente = clienteService.criarCliente(cliente);
-        return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
+    public ResponseEntity<?> criarCliente(@RequestBody Cliente cliente) {
+        try {
+            Cliente novoCliente = clienteService.criarCliente(cliente);
+            ClienteResponseDTO clienteResponse = new ClienteResponseDTO(
+                    novoCliente.getId(),
+                    novoCliente.getNome(),
+                    novoCliente.getCpf(),
+                    novoCliente.getDataNascimento(),
+                    novoCliente.getEmail(),
+                    novoCliente.getTelefone(),
+                    novoCliente.getEndereco(),
+                    null
+            );
+            return new ResponseEntity<>(clienteResponse, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiErrorResponse(
+                            "INTERNAL_SERVER_ERROR",
+                            "Erro Interno",
+                            "Ocorreu um erro ao criar o cliente."
+                    ));
+        }
     }
+    
 
     // Endpoint para associar um cartão existente a um cliente usando o ID do cartão
     @PostMapping("/{clienteId}/cartoes/{cartaoId}")
