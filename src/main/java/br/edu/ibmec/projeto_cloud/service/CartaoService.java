@@ -1,6 +1,9 @@
 package br.edu.ibmec.projeto_cloud.service;
 
 import br.edu.ibmec.projeto_cloud.exception.CartaoNaoEncontradoException;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,5 +36,6 @@ public class CartaoService {
         Cartao cartao = buscarPorId(cartaoId);
         return cartao.getCliente(); // Certifique-se de que o Cartao tenha o método getCliente()
     }
+   
 
 }
