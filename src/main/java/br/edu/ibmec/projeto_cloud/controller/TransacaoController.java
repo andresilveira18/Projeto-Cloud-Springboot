@@ -1,7 +1,13 @@
 package br.edu.ibmec.projeto_cloud.controller;
 
 import br.edu.ibmec.projeto_cloud.dto.TransacaoResponseDTO;
+import br.edu.ibmec.projeto_cloud.exception.ApiErrorResponse;
+import br.edu.ibmec.projeto_cloud.exception.CartaoInativoException;
+import br.edu.ibmec.projeto_cloud.exception.CartaoNaoEncontradoException;
 import br.edu.ibmec.projeto_cloud.exception.ClienteNaoEncontradoException;
+import br.edu.ibmec.projeto_cloud.exception.FrequenciaAltaTransacoesException;
+import br.edu.ibmec.projeto_cloud.exception.LimiteInsuficienteException;
+import br.edu.ibmec.projeto_cloud.exception.TransacaoDuplicadaException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,14 +34,34 @@ public class TransacaoController {
 
     // Endpoint para autorizar uma nova transação
     @PostMapping("/autorizar/{cartaoId}")
-    public ResponseEntity<TransacaoResponseDTO> autorizarTransacao(@PathVariable int cartaoId, @RequestBody Transacao transacao) {
-        TransacaoResponseDTO resultado = transacaoService.autorizarTransacao(cartaoId, transacao);
-        if ("Sucesso".equals(resultado.getStatus())) {
+    public ResponseEntity<?> autorizarTransacao(@PathVariable int cartaoId, @RequestBody Transacao transacao) {
+        try {
+            // Autoriza a transação no serviço
+            TransacaoResponseDTO resultado = transacaoService.autorizarTransacao(cartaoId, transacao);
+    
+            // Retorna sucesso
             return ResponseEntity.ok(resultado);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+        } catch (CartaoNaoEncontradoException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getErrorResponse());
+        } catch (CartaoInativoException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getErrorResponse());
+        } catch (LimiteInsuficienteException e) {
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(e.getErrorResponse());
+        } catch (FrequenciaAltaTransacoesException e) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(e.getErrorResponse());
+        } catch (TransacaoDuplicadaException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getErrorResponse());
+        } catch (Exception e) {
+            // Captura qualquer erro inesperado
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiErrorResponse(
+                            "INTERNAL_SERVER_ERROR",
+                            "Erro Interno",
+                            "Ocorreu um erro inesperado no servidor."
+                    ));
         }
     }
+    
 
     // Endpoint para buscar todas as transações aprovadas de um cliente
     @GetMapping("/cliente/{id}")
